@@ -1,0 +1,15 @@
+[Unit]
+Description=Fix sysfs permissions for linuwu_sense kernel module
+# Run after the module is loaded; retried if the module loads late.
+After=systemd-modules-load.service local-fs.target
+Wants=systemd-modules-load.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/lib/linuwu-sense-gui/set-sysfs-perms.sh
+# Also re-run if the module reloads (e.g. after a suspend/resume)
+ExecStartPost=/bin/sh -c 'udevadm trigger --subsystem-match=platform 2>/dev/null || true'
+
+[Install]
+WantedBy=multi-user.target

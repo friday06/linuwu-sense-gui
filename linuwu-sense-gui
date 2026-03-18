@@ -1,0 +1,9 @@
+#!/usr/bin/env python3
+"""Launcher script for linuwu sense — installed system-wide."""
+
+import sys
+import os
+sys.path.insert(0, '/usr/lib/linuwu-sense-gui')
+
+import main
+main.main()

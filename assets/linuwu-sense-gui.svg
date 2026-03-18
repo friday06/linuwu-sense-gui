@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Dark background gradient -->
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#1a1a1a"/>
+      <stop offset="100%" stop-color="#0d0d0d"/>
+    </radialGradient>
+    <!-- Red glow gradient for the N -->
+    <linearGradient id="ngrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%"   stop-color="#ff2020"/>
+      <stop offset="60%"  stop-color="#cc0000"/>
+      <stop offset="100%" stop-color="#880000"/>
+    </linearGradient>
+    <!-- Subtle red radial glow behind N -->
+    <radialGradient id="glow" cx="50%" cy="48%" r="42%">
+      <stop offset="0%"   stop-color="#ff0000" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#ff0000" stop-opacity="0"/>
+    </radialGradient>
+    <!-- RGB stripe gradient across bottom zones -->
+    <linearGradient id="rgb" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"    stop-color="#ff0000"/>
+      <stop offset="33%"   stop-color="#00ff00"/>
+      <stop offset="66%"   stop-color="#0066ff"/>
+      <stop offset="100%"  stop-color="#ff00ff"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#ff0000" flood-opacity="0.55"/>
+    </filter>
+    <filter id="softshadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="248" fill="url(#bg)" stroke="#2a2a2a" stroke-width="4"/>
+
+  <!-- Red glow behind N -->
+  <circle cx="256" cy="248" r="200" fill="url(#glow)"/>
+
+  <!-- Outer angular ring segments (Nitro style decorative arcs) -->
+  <path d="M 256 32 A 224 224 0 0 1 448 160" fill="none" stroke="#ff2020" stroke-width="5" stroke-linecap="round" opacity="0.7"/>
+  <path d="M 448 352 A 224 224 0 0 1 256 480" fill="none" stroke="#ff2020" stroke-width="5" stroke-linecap="round" opacity="0.4"/>
+  <path d="M 64 352 A 224 224 0 0 1 64 160" fill="none" stroke="#cc0000" stroke-width="3" stroke-linecap="round" opacity="0.35"/>
+
+  <!-- Tick marks on ring -->
+  <line x1="256" y1="32"  x2="256" y2="52"  stroke="#ff2020" stroke-width="4" stroke-linecap="round"/>
+  <line x1="480" y1="256" x2="460" y2="256" stroke="#ff2020" stroke-width="4" stroke-linecap="round"/>
+  <line x1="32"  y1="256" x2="52"  y2="256" stroke="#cc0000" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+
+  <!-- Large bold N — Nitro style with diagonal slash -->
+  <!-- Left vertical bar -->
+  <rect x="118" y="136" width="60" height="240" rx="6" fill="url(#ngrad)" filter="url(#shadow)"/>
+  <!-- Right vertical bar -->
+  <rect x="334" y="136" width="60" height="240" rx="6" fill="url(#ngrad)" filter="url(#shadow)"/>
+  <!-- Diagonal slash from top-left to bottom-right -->
+  <polygon
+    points="178,136  245,136  394,376  334,376"
+    fill="url(#ngrad)"
+    filter="url(#softshadow)"
+  />
+
+  <!-- Small angular accent lines (Nitro design language) -->
+  <line x1="118" y1="136" x2="88"  y2="106" stroke="#ff4444" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+  <line x1="394" y1="376" x2="424" y2="406" stroke="#ff4444" stroke-width="4" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- RGB keyboard zone strip at bottom -->
+  <rect x="88" y="412" width="336" height="16" rx="8" fill="url(#rgb)" opacity="0.85"/>
+
+  <!-- Four zone separators -->
+  <line x1="172" y1="412" x2="172" y2="428" stroke="#1a1a1a" stroke-width="2"/>
+  <line x1="256" y1="412" x2="256" y2="428" stroke="#1a1a1a" stroke-width="2"/>
+  <line x1="340" y1="412" x2="340" y2="428" stroke="#1a1a1a" stroke-width="2"/>
+
+  <!-- Small fan / bolt icon (top-right quadrant) as accent -->
+  <circle cx="390" cy="122" r="22" fill="#1a1a1a" stroke="#ff2020" stroke-width="2.5" opacity="0.9"/>
+  <!-- Lightning bolt inside -->
+  <polygon points="394,106 384,122 391,122 386,138 400,120 392,120" fill="#ff2020"/>
+</svg>
