@@ -24,3 +24,5 @@ src/
 Thumbs.db
 pkg/
 src/
+*.pkg.tar.zst
+*.tar.gz
