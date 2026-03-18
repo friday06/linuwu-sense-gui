@@ -50,6 +50,24 @@ package() {
     install -Dm644 LICENSE    "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
 
+post_install() {
+    echo ""
+    echo "  ──────────────────────────────────────────────"
+    echo "  linuwu-sense-gui installed successfully"
+    echo "  ──────────────────────────────────────────────"
+    echo ""
+    if ! lsmod 2>/dev/null | grep -q "^linuwu_sense"; then
+        echo "  ⚠  linuwu_sense kernel module not detected."
+        echo "     Install it from: https://github.com/0x7375646F/Linuwu-Sense"
+        echo "     Then run: sudo modprobe linuwu_sense"
+        echo ""
+    fi
+    echo "  ⚠  Log out and back in to activate hardware access permissions."
+    echo "     Launch: linuwu-sense-gui"
+    echo ""
+}
+
+
 post_remove() {
     # Clear user cache and config on pacman -R
     for dir in /home/*; do

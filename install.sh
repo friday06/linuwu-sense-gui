@@ -1,78 +1,145 @@
 #!/usr/bin/env bash
-# install.sh — Install linuwu sense on Arch Linux
+# install.sh — Install linuwu-sense-gui
+# Supports Arch Linux and most systemd-based distros.
 set -euo pipefail
 
-RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'; NC='\033[0m'
-info()  { echo -e "${GREEN}[+]${NC} $*"; }
-warn()  { echo -e "${YELLOW}[!]${NC} $*"; }
-error() { echo -e "${RED}[✗]${NC} $*"; exit 1; }
+# ── Colours & helpers ─────────────────────────────────────────────────────────
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[1;33m'
+CYAN='\033[0;36m'; BOLD='\033[1m'; NC='\033[0m'
+
+info()    { echo -e "  ${GREEN}✓${NC}  $*"; }
+step()    { echo -e "\n${BOLD}${CYAN}▶  $*${NC}"; }
+warn()    { echo -e "  ${YELLOW}⚠${NC}  $*"; }
+error()   { echo -e "  ${RED}✗${NC}  $*"; exit 1; }
+detail()  { echo -e "     ${NC}\033[2m$*\033[0m"; }
 
 INSTALL_DIR="/usr/lib/linuwu-sense-gui"
 
-[[ "$EUID" -ne 0 ]] && error "Please run as root: sudo ./install.sh"
-command -v python3 &>/dev/null || error "python3 not found: sudo pacman -S python"
+# ── Banner ────────────────────────────────────────────────────────────────────
+echo ""
+echo -e "${BOLD}  linuwu-sense-gui — Installer${NC}"
+echo -e "  \033[2mAcer Predator & Nitro hardware control\033[0m"
+echo -e "  $(printf '─%.0s' {1..44})"
 
-# ── Resolve the real user (not root) ──────────────────────────────────────
+# ── Root check ────────────────────────────────────────────────────────────────
+[[ "$EUID" -ne 0 ]] && error "Please run as root: sudo ./install.sh"
+
+# ── Resolve the real user (not root) ─────────────────────────────────────────
 REAL_USER="${SUDO_USER:-}"
-[[ -z "$REAL_USER" || "$REAL_USER" == "root" ]] && REAL_USER="$(logname 2>/dev/null || true)"
+[[ -z "$REAL_USER" || "$REAL_USER" == "root" ]] && \
+    REAL_USER="$(logname 2>/dev/null || true)"
 REAL_HOME="$(getent passwd "$REAL_USER" 2>/dev/null | cut -d: -f6 || true)"
 
-# ── Dependencies ───────────────────────────────────────────────────────────
-# Check PyQt6 (Arch ships 6.10.x which satisfies >=6.7 requirement)
-python3 -c "import PyQt6" 2>/dev/null || {
-    warn "python-pyqt6 not found — installing..."
-    pacman -S --needed --noconfirm python-pyqt6 || error "Failed to install python-pyqt6"
-}
+# ── Step 1: Kernel module check ───────────────────────────────────────────────
+step "Checking kernel module"
 
-# Optional: power-profiles-daemon for KDE power mode sync
-if ! command -v powerprofilesctl &>/dev/null; then
-    warn "powerprofilesctl not found — KDE power-mode sync disabled."
-    warn "Install with: sudo pacman -S power-profiles-daemon"
+if lsmod | grep -q "^linuwu_sense"; then
+    info "linuwu_sense module is loaded"
+elif modinfo linuwu_sense &>/dev/null; then
+    warn "linuwu_sense is installed but not loaded"
+    detail "Run: sudo modprobe linuwu_sense"
+    detail "To load on boot: echo linuwu_sense | sudo tee /etc/modules-load.d/linuwu_sense.conf"
+else
+    warn "linuwu_sense kernel module not found"
+    detail "This app requires the linuwu_sense kernel module to control hardware."
+    detail "Install it from: https://github.com/0x7375646F/Linuwu-Sense"
+    detail "Then run: sudo modprobe linuwu_sense"
+    detail ""
+    detail "Continuing installation — you can install the module later."
 fi
 
-# ── acer-nitro group ───────────────────────────────────────────────────────
-groupadd --system acer-nitro 2>/dev/null || true
+# ── Step 2: Python ────────────────────────────────────────────────────────────
+step "Checking dependencies"
+
+command -v python3 &>/dev/null || error "python3 not found — install it via your package manager"
+info "python3 found — $(python3 --version)"
+
+# PyQt6
+if python3 -c "import PyQt6" 2>/dev/null; then
+    VER=$(python3 -c "import PyQt6.QtCore; print(PyQt6.QtCore.PYQT_VERSION_STR)" 2>/dev/null || echo "unknown")
+    info "PyQt6 found — v$VER"
+else
+    warn "PyQt6 not found — attempting install..."
+    if command -v pacman &>/dev/null; then
+        pacman -S --needed --noconfirm python-pyqt6 || error "Failed to install python-pyqt6"
+    elif command -v apt-get &>/dev/null; then
+        apt-get install -y python3-pyqt6 || error "Failed to install python3-pyqt6"
+    elif command -v dnf &>/dev/null; then
+        dnf install -y python3-pyqt6 || error "Failed to install python3-pyqt6"
+    else
+        error "Cannot install PyQt6 automatically. Run: pip install PyQt6"
+    fi
+    info "PyQt6 installed"
+fi
+
+# power-profiles-daemon (optional)
+if command -v powerprofilesctl &>/dev/null; then
+    info "powerprofilesctl found — KDE power-mode sync enabled"
+else
+    warn "powerprofilesctl not found — KDE power-mode sync will be disabled"
+    detail "Install power-profiles-daemon and enable the service to enable this feature"
+fi
+
+# ── Step 3: Group & permissions ───────────────────────────────────────────────
+step "Setting up hardware access"
+
+groupadd --system acer-nitro 2>/dev/null && \
+    info "Created acer-nitro group" || \
+    info "acer-nitro group already exists"
+
 if [[ -n "$REAL_USER" ]]; then
     usermod -aG acer-nitro "$REAL_USER"
+    info "Added $REAL_USER to acer-nitro group"
 fi
 
-# ── App files ──────────────────────────────────────────────────────────────
-info "Installing app..."
-install -dm755 "$INSTALL_DIR"
-# Copy app files including package markers
-cp -r config controller ui main.py "$INSTALL_DIR/"
-touch "$INSTALL_DIR/config/__init__.py" "$INSTALL_DIR/controller/__init__.py" "$INSTALL_DIR/ui/__init__.py"
-install -Dm755 linuwu-sense-gui /usr/bin/linuwu-sense-gui
+# ── Step 4: Application files ─────────────────────────────────────────────────
+step "Installing application"
 
-# ── .desktop + icon ────────────────────────────────────────────────────────
+install -dm755 "$INSTALL_DIR"
+cp -r config controller ui main.py "$INSTALL_DIR/"
+touch "$INSTALL_DIR/config/__init__.py" \
+      "$INSTALL_DIR/controller/__init__.py" \
+      "$INSTALL_DIR/ui/__init__.py"
+install -Dm755 linuwu-sense-gui /usr/bin/linuwu-sense-gui
+info "Application files installed to $INSTALL_DIR"
+
+# ── Step 5: Desktop integration ───────────────────────────────────────────────
+step "Registering with desktop environment"
+
 install -Dm644 linuwu-sense-gui.desktop \
     /usr/share/applications/linuwu-sense-gui.desktop
+info "App menu entry registered"
+
 install -Dm644 assets/linuwu-sense-gui.svg \
     /usr/share/icons/hicolor/scalable/apps/linuwu-sense-gui.svg
 gtk-update-icon-cache /usr/share/icons/hicolor 2>/dev/null || true
 update-desktop-database /usr/share/applications 2>/dev/null || true
+info "Icon installed"
 
-# ── udev — sysfs permissions ───────────────────────────────────────────────
-info "Installing udev rules..."
+install -Dm644 org.linuwu-sense.gui.policy \
+    /usr/share/polkit-1/actions/org.linuwu-sense.gui.policy
+info "Polkit policy installed"
+
+# ── Step 6: udev rules ────────────────────────────────────────────────────────
+step "Installing udev rules"
+
 install -Dm644 60-linuwu-sense.rules /etc/udev/rules.d/60-linuwu-sense.rules
 install -Dm755 set-sysfs-perms.sh    "$INSTALL_DIR/set-sysfs-perms.sh"
 udevadm control --reload-rules 2>/dev/null || true
 udevadm trigger --subsystem-match=platform 2>/dev/null || true
-udevadm trigger --subsystem-match=cpu      2>/dev/null || true
+info "Sysfs permission rules installed"
 
-# ── udev — Nitro hardware key ──────────────────────────────────────────────
 install -Dm644 99-nitro-key.hwdb /etc/udev/hwdb.d/99-nitro-key.hwdb
-systemd-hwdb update  2>/dev/null || true
-udevadm trigger      2>/dev/null || true
+systemd-hwdb update 2>/dev/null || true
+udevadm trigger 2>/dev/null || true
+info "Nitro key mapping installed"
 
-# ── KDE global shortcut — write config directly, no qdbus needed ───────────
-# Works on KDE 5 and KDE 6. The shortcut file is read at session start;
-# kglobalaccel picks it up automatically on next login.
+# ── Step 7: KDE shortcut ──────────────────────────────────────────────────────
+step "Configuring KDE shortcut"
+
 if [[ -n "$REAL_HOME" ]]; then
     KDE_CFG="$REAL_HOME/.config/kglobalshortcutsrc"
-    # Remove any stale entry for this app first, then append a clean one.
     if [[ -f "$KDE_CFG" ]]; then
-        # Strip the old block (between [linuwu-sense-gui.desktop] and the next [)
         python3 - "$KDE_CFG" << 'PYEOF'
 import sys, re
 path = sys.argv[1]
@@ -81,20 +148,36 @@ txt  = re.sub(r'\[linuwu-sense-gui\.desktop\][^\[]*', '', txt, flags=re.S)
 open(path, 'w').write(txt.strip() + '\n')
 PYEOF
     fi
-    # Append the new shortcut block
-    # Launch1 = XF86Launch1 = the Nitro/PredatorSense hardware key
-    cat >> "$KDE_CFG" << 'EOF'
+    cat >> "$KDE_CFG" << 'KEOF'
 
 [linuwu-sense-gui.desktop]
 _k_friendly_name=linuwu sense
 _launch=Launch1,none,linuwu sense
-EOF
+KEOF
     chown "$REAL_USER:" "$KDE_CFG" 2>/dev/null || true
+    info "Nitro key shortcut registered (takes effect after re-login)"
+else
+    warn "Could not detect user home — KDE shortcut not configured"
 fi
 
-# ── Done ───────────────────────────────────────────────────────────────────
+# ── Done ──────────────────────────────────────────────────────────────────────
 echo ""
-echo -e "${GREEN}✔  linuwu sense installed.${NC}"
+echo -e "  $(printf '─%.0s' {1..44})"
+echo -e "  ${BOLD}${GREEN}Installation complete!${NC}"
 echo ""
-warn "Log out and back in for group permissions and the Nitro key to activate."
-warn "Kernel module required:  sudo modprobe linuwu_sense"
+echo -e "  ${BOLD}Next steps:${NC}"
+
+if ! lsmod | grep -q "^linuwu_sense"; then
+    echo -e "  ${YELLOW}1.${NC} Install the kernel module:"
+    echo -e "     ${CYAN}https://github.com/0x7375646F/Linuwu-Sense${NC}"
+    echo -e "     then run: ${BOLD}sudo modprobe linuwu_sense${NC}"
+    echo ""
+    echo -e "  ${YELLOW}2.${NC} Log out and back in to activate group permissions"
+    echo -e "     and the NitroSense hardware key shortcut."
+else
+    echo -e "  ${YELLOW}1.${NC} Log out and back in to activate group permissions"
+    echo -e "     and the NitroSense hardware key shortcut."
+fi
+echo ""
+echo -e "  Launch: ${BOLD}linuwu-sense-gui${NC}"
+echo ""
