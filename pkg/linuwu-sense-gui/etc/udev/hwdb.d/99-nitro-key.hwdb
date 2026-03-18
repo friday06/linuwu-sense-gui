@@ -1,7 +1,0 @@
-# Acer Nitro / Predator — remap the NitroSense/PredatorSense key (0x94)
-# so the kernel exposes it as KEY_PROG1 consistently across all models.
-evdev:atkbd:*
- KEYBOARD_KEY_94=prog1
-
-evdev:input:b0003*
- KEYBOARD_KEY_94=prog1
