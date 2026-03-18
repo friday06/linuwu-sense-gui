@@ -36,8 +36,8 @@ from config.constants import APP_NAME
 
 # Temperature threshold colours (Breeze semantic)
 _COL_NORMAL   = None          # None → use windowText (monochrome)
-_COL_WARNING  = QColor("#f67400")   # warm orange
-_COL_CRITICAL = QColor("#ff3a3a")   # logo red
+_COL_WARNING  = QColor("#f67400")   # Breeze orange
+_COL_CRITICAL = QColor("#da4453")   # Breeze red
 
 
 def _make_icon(temp: float, size: int = 22) -> QIcon:
@@ -59,7 +59,7 @@ def _make_icon(temp: float, size: int = 22) -> QIcon:
     elif temp >= 75:
         arc_col = _COL_WARNING
     else:
-        arc_col = QColor('#a78bfa')   # logo purple — matches brand
+        arc_col = QColor(fg)   # copy so we can setAlpha
 
     p = QPainter(px)
     p.setRenderHint(QPainter.RenderHint.Antialiasing)

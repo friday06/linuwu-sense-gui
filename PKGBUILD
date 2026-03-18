@@ -49,3 +49,18 @@ package() {
     install -Dm644 CREDITS    "$pkgdir/usr/share/doc/$pkgname/CREDITS"
     install -Dm644 LICENSE    "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
+
+post_remove() {
+    # Clear user cache and config on pacman -R
+    for dir in /home/*; do
+        [[ -d "$dir" ]] || continue
+        rm -rf "$dir/.config/linuwu-sense"
+        rm -rf "$dir/.config/linuwu-sense-gui"
+        rm -rf "$dir/.cache/linuwu-sense"
+        rm -rf "$dir/.cache/linuwu-sense-gui"
+    done
+    update-desktop-database /usr/share/applications 2>/dev/null || true
+    gtk-update-icon-cache /usr/share/icons/hicolor 2>/dev/null || true
+    udevadm control --reload-rules 2>/dev/null || true
+    systemd-hwdb update 2>/dev/null || true
+}

@@ -60,20 +60,11 @@ class AboutDialog(QDialog):
         layout.setSpacing(sp * 2)
         layout.setContentsMargins(m, m, m, sp * 2)
 
-        # App icon + name
-        icon_row = QHBoxLayout()
-        icon_row.setSpacing(12)
-        icon_row.addStretch()
-        if os.path.exists(ICON_PATH):
-            icon_lbl = QLabel()
-            icon_lbl.setPixmap(QIcon(ICON_PATH).pixmap(64, 64))
-            icon_row.addWidget(icon_lbl)
+        # App name + version
         name_lbl = QLabel(APP_NAME)
-        name_lbl.setAlignment(Qt.AlignmentFlag.AlignVCenter)
+        name_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         name_lbl.setStyleSheet("font-size: 18px; font-weight: bold;")
-        icon_row.addWidget(name_lbl)
-        icon_row.addStretch()
-        layout.addLayout(icon_row)
+        layout.addWidget(name_lbl)
 
         ver_lbl = QLabel(f"Version {APP_VERSION}  ·  Acer Predator &amp; Nitro")
         ver_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -157,11 +148,12 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(APP_NAME)
         self.setMinimumSize(640, 480)
 
-        # Window icon — custom logo everywhere except tray (tray uses its own)
-        app_icon = QIcon(ICON_PATH) if os.path.exists(ICON_PATH) \
-            else QIcon.fromTheme("computer-laptop", QIcon.fromTheme("preferences-system"))
-        self.setWindowIcon(app_icon)
-        QApplication.setWindowIcon(app_icon)  # also sets taskbar icon
+        # Set window icon
+        if os.path.exists(ICON_PATH):
+            self.setWindowIcon(QIcon(ICON_PATH))
+        else:
+            self.setWindowIcon(QIcon.fromTheme("computer-laptop",
+                               QIcon.fromTheme("preferences-system")))
 
         # Size relative to the available screen geometry
         if screen := QApplication.primaryScreen():
