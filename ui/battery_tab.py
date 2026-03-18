@@ -33,6 +33,7 @@ class BatteryTab(QWidget):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         inner  = QWidget()
+        inner.setMaximumWidth(1600)
         layout = QVBoxLayout(inner)
         sp = QApplication.style().pixelMetric(QStyle.PixelMetric.PM_LayoutVerticalSpacing)
         m  = QApplication.style().pixelMetric(QStyle.PixelMetric.PM_LayoutLeftMargin)
@@ -120,7 +121,13 @@ class BatteryTab(QWidget):
         layout.addWidget(preset_grp)
 
         layout.addStretch()
-        scroll.setWidget(inner)
+        outer_w = QWidget()
+        outer_l = QHBoxLayout(outer_w)
+        outer_l.setContentsMargins(0, 0, 0, 0)
+        outer_l.addStretch()
+        outer_l.addWidget(inner, 1)
+        outer_l.addStretch()
+        scroll.setWidget(outer_w)
 
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)

@@ -3,28 +3,28 @@
 linuwu-sense-gui — main_window.py
 Top-level application window.
 
-Design notes (KDE HIG / Breeze):
-  • No custom title-bar widget — the OS window decoration shows the app name.
-  • Spacing and margins are read from QStyle pixel-metrics so they follow
-    the user's configured spacing (compact / normal / relaxed).
-  • Tab icons use QIcon.fromTheme() for system-consistent symbols.
-  • The footer carries only two actions (Refresh, About) — no decorative text
-    that duplicates information already in the window title or About dialog.
+Layout mirrors KDE System Monitor:
+  • Left sidebar — icon + label nav items, Refresh + About at bottom
+  • Right content — QStackedWidget, one page per section
+  • No tab bar — the sidebar IS the navigation
 """
 
 import os
 from PyQt6.QtWidgets import (
-    QMainWindow, QTabWidget, QWidget, QVBoxLayout, QHBoxLayout,
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QStackedWidget,
     QLabel, QPushButton, QSizePolicy, QDialog, QDialogButtonBox,
-    QFrame, QApplication, QStyle, QSystemTrayIcon,
+    QFrame, QApplication, QStyle, QSystemTrayIcon, QListWidget,
+    QListWidgetItem, QSplitter, QAbstractItemView,
 )
-from PyQt6.QtCore import Qt, QUrl
-from PyQt6.QtGui import QIcon, QDesktopServices
+from PyQt6.QtCore import Qt, QUrl, QSize
+from PyQt6.QtGui import QIcon, QDesktopServices, QFont
 
 from ui.thermal_fan_tab import ThermalFanTab
 from ui.battery_tab import BatteryTab
 from ui.keyboard_tab import KeyboardTab
 from ui.advanced_tab import AdvancedTab
+from ui.fan_tab import FanTab
+from ui.settings_tab import SettingsTab
 from controller.feature_detector import FeatureDetector
 from controller.sysfs_controller import SysfsController
 from config.constants import APP_NAME, APP_VERSION, ICON_PATH
@@ -33,7 +33,6 @@ from ui.welcome import WelcomeDialog, should_show
 
 
 def _sp(metric: QStyle.PixelMetric) -> int:
-    """Query the current style for a layout pixel metric."""
     return QApplication.style().pixelMetric(metric)
 
 
@@ -53,14 +52,13 @@ class AboutDialog(QDialog):
         self.setMinimumWidth(460)
         self.setModal(True)
 
-        m  = _sp(QStyle.PixelMetric.PM_LayoutLeftMargin) * 2   # 16-24 px
-        sp = _sp(QStyle.PixelMetric.PM_LayoutVerticalSpacing)   # 6-8 px
+        m  = _sp(QStyle.PixelMetric.PM_LayoutLeftMargin) * 2
+        sp = _sp(QStyle.PixelMetric.PM_LayoutVerticalSpacing)
 
         layout = QVBoxLayout(self)
         layout.setSpacing(sp * 2)
         layout.setContentsMargins(m, m, m, sp * 2)
 
-        # App icon + name
         icon_row = QHBoxLayout()
         icon_row.setSpacing(12)
         icon_row.addStretch()
@@ -83,16 +81,14 @@ class AboutDialog(QDialog):
         layout.addWidget(_hline())
 
         desc = QLabel(
-            "A native KDE graphical interface for controlling hardware "
-            "features on Acer Predator and Nitro laptops via the "
-            "<b>linuwu_sense</b> kernel module."
+            "Hardware control application for Acer Predator and Nitro laptops.\n"
+            "Built on the <b>linuwu_sense</b> kernel module."
         )
         desc.setAlignment(Qt.AlignmentFlag.AlignCenter)
         desc.setWordWrap(True)
         layout.addWidget(desc)
 
         layout.addWidget(_hline())
-
         layout.addWidget(QLabel("<b>Credits</b>",
                                 alignment=Qt.AlignmentFlag.AlignCenter))
 
@@ -140,6 +136,52 @@ class AboutDialog(QDialog):
         layout.addWidget(btns)
 
 
+# ── Sidebar nav list ──────────────────────────────────────────────────────────
+
+class _SideBar(QListWidget):
+    """
+    KDE System Monitor-style left navigation.
+    Each item has a 22×22 icon and a label.
+    The selected item drives the QStackedWidget on the right.
+    """
+
+    def __init__(self, parent=None) -> None:
+        super().__init__(parent)
+        self.setIconSize(QSize(22, 22))
+        self.setSpacing(2)
+        self.setMinimumWidth(160)
+        self.setMaximumWidth(220)
+        self.setFrameShape(QFrame.Shape.NoFrame)
+        self.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        # Style: no border, highlight row with Plasma accent colour
+        self.setStyleSheet("""
+            QListWidget {
+                background: transparent;
+                border: none;
+                padding: 4px 0;
+            }
+            QListWidget::item {
+                padding: 8px 12px;
+                border-radius: 6px;
+                margin: 1px 6px;
+            }
+            QListWidget::item:selected {
+                background: palette(highlight);
+                color: palette(highlighted-text);
+            }
+            QListWidget::item:hover:!selected {
+                background: palette(alternate-base);
+            }
+        """)
+
+    def add_page(self, icon_name: str, label: str) -> None:
+        item = QListWidgetItem(QIcon.fromTheme(icon_name), label)
+        item.setSizeHint(QSize(148, 38))
+        self.addItem(item)
+
+
 # ── Main window ───────────────────────────────────────────────────────────────
 
 class MainWindow(QMainWindow):
@@ -155,131 +197,173 @@ class MainWindow(QMainWindow):
 
     def _build_ui(self) -> None:
         self.setWindowTitle(APP_NAME)
-        self.setMinimumSize(640, 480)
+        self.setMinimumSize(720, 520)
 
-        # Window icon — custom logo everywhere except tray (tray uses its own)
         app_icon = QIcon(ICON_PATH) if os.path.exists(ICON_PATH) \
-            else QIcon.fromTheme("computer-laptop", QIcon.fromTheme("preferences-system"))
+            else QIcon.fromTheme("computer-laptop",
+                                 QIcon.fromTheme("preferences-system"))
         self.setWindowIcon(app_icon)
-        QApplication.setWindowIcon(app_icon)  # also sets taskbar icon
+        QApplication.setWindowIcon(app_icon)
 
-        # Size relative to the available screen geometry
         if screen := QApplication.primaryScreen():
             sg = screen.availableGeometry()
-            w = max(700, min(920, int(sg.width()  * 0.55)))
-            h = max(520, min(700, int(sg.height() * 0.65)))
+            w = max(760, min(1024, int(sg.width()  * 0.60)))
+            h = max(560, min(780, int(sg.height() * 0.70)))
             self.resize(w, h)
             self.move(sg.center().x() - w // 2,
                       sg.center().y() - h // 2)
 
-        # Style-metric based spacing
-        m  = _sp(QStyle.PixelMetric.PM_LayoutLeftMargin)
-        sp = _sp(QStyle.PixelMetric.PM_LayoutVerticalSpacing)
-
         central = QWidget()
         self.setCentralWidget(central)
         root = QVBoxLayout(central)
-        root.setSpacing(sp)
-        root.setContentsMargins(m, m, m, sp)
+        root.setSpacing(0)
+        root.setContentsMargins(0, 0, 0, 0)
 
-        # Tab widget
-        self._tabs = QTabWidget()
-        self._tabs.setSizePolicy(
-            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
-        self._populate_tabs()
-        root.addWidget(self._tabs)
+        # ── Header bar ────────────────────────────────────────────────────
+        header = QWidget()
+        header.setObjectName("sidebar-header")
+        header.setFixedHeight(48)
+        header.setStyleSheet("""
+            #sidebar-header {
+                background: palette(button);
+                border-bottom: 1px solid palette(mid);
+            }
+            #sidebar-header QLabel {
+                color: palette(buttontext);
+            }
+        """)
+        hl = QHBoxLayout(header)
+        hl.setContentsMargins(16, 0, 12, 0)
+        hl.setSpacing(8)
 
-        # Footer — two buttons, no decorative credits text
-        root.addWidget(_hline())
-        footer = QHBoxLayout()
-        footer.setContentsMargins(0, 0, 0, 0)
+        title_lbl = QLabel(APP_NAME)
+        font = QFont()
+        font.setPointSize(13)
+        font.setBold(True)
+        title_lbl.setFont(font)
+        # No inline style — inherit from window palette correctly
+        hl.addWidget(title_lbl)
+        hl.addStretch()
 
-        refresh_btn = QPushButton(
-            QIcon.fromTheme("view-refresh"), "Refresh")
+        refresh_btn = QPushButton(QIcon.fromTheme("view-refresh"), "Refresh")
+        refresh_btn.setFixedHeight(32)
         refresh_btn.clicked.connect(self._refresh)
-        footer.addWidget(refresh_btn)
+        hl.addWidget(refresh_btn)
 
-        footer.addStretch()
-
-        about_btn = QPushButton(
-            QIcon.fromTheme("help-about"), "About")
+        about_btn = QPushButton(QIcon.fromTheme("help-about"), "About")
+        about_btn.setFixedHeight(32)
         about_btn.clicked.connect(self._about)
-        footer.addWidget(about_btn)
+        hl.addWidget(about_btn)
 
-        root.addLayout(footer)
+        root.addWidget(header)
+
+        # ── Splitter: sidebar | content ───────────────────────────────────
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+        splitter.setHandleWidth(1)
+        splitter.setStyleSheet("QSplitter::handle { background: palette(mid); }")
+
+        # Left sidebar
+        sidebar_container = QWidget()
+        sidebar_container.setObjectName("sidebar-container")
+        sidebar_container.setStyleSheet("""
+            #sidebar-container {
+                background: palette(window);
+                border-right: 1px solid palette(mid);
+            }
+        """)
+        sc_layout = QVBoxLayout(sidebar_container)
+        sc_layout.setContentsMargins(0, 8, 0, 8)
+        sc_layout.setSpacing(0)
+
+        self._sidebar = _SideBar()
+        self._sidebar.currentRowChanged.connect(self._on_nav)
+        sc_layout.addWidget(self._sidebar)
+
+        splitter.addWidget(sidebar_container)
+
+        # Right content
+        self._stack = QStackedWidget()
+        splitter.addWidget(self._stack)
+
+        splitter.setStretchFactor(0, 0)
+        splitter.setStretchFactor(1, 1)
+        splitter.setSizes([180, 900])
+        splitter.setCollapsible(0, False)
+        splitter.setCollapsible(1, False)
+
+        root.addWidget(splitter, 1)
+
+        self._populate_pages()
+
+    def _populate_pages(self) -> None:
+        self._sidebar.clear()
+        while self._stack.count():
+            self._stack.removeWidget(self._stack.widget(0))
+
+        self._ctrl.sense_base = self._detector.get_sense_base()
+
+        for key in self._detector.get_available_tabs():
+            if key == "thermal_fan":
+                self._sidebar.add_page("cpu",            "Overview")
+                self._stack.addWidget(ThermalFanTab(self._ctrl))
+            elif key == "fan_control":
+                self._sidebar.add_page("cpu-symbolic",   "Fan Control")
+                self._stack.addWidget(FanTab(self._ctrl))
+            elif key == "battery":
+                self._sidebar.add_page("battery",        "Battery")
+                self._stack.addWidget(BatteryTab(self._ctrl))
+            elif key == "keyboard":
+                self._sidebar.add_page("input-keyboard", "Keyboard RGB")
+                self._stack.addWidget(KeyboardTab(self._ctrl))
+            elif key == "advanced":
+                self._sidebar.add_page("configure",      "Advanced")
+                self._stack.addWidget(AdvancedTab(self._ctrl))
+
+        # Settings always shown
+        self._sidebar.add_page("preferences-system", "Settings")
+        self._stack.addWidget(SettingsTab())
+
+        if self._stack.count() == 0:
+            placeholder = QLabel(
+                "No compatible hardware features detected.\n\n"
+                "Ensure the linuwu_sense kernel module is loaded:\n"
+                "    sudo modprobe linuwu_sense"
+            )
+            placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
+            placeholder.setProperty("secondary", "true")
+            self._sidebar.add_page("dialog-warning", "Status")
+            self._stack.addWidget(placeholder)
+
+        self._sidebar.setCurrentRow(0)
+
+    def _on_nav(self, row: int) -> None:
+        if 0 <= row < self._stack.count():
+            self._stack.setCurrentIndex(row)
 
     def _setup_tray(self) -> None:
-        """Create the system tray icon (if the desktop supports it)."""
         if not QSystemTrayIcon.isSystemTrayAvailable():
             return
         self._tray = TrayIcon(self, self._ctrl)
         self._tray.show()
-        # Close-to-tray: hide window instead of quitting
         self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, False)
 
     def update_tray(self, cpu_temp: float, profile: str) -> None:
-        """Called by the active tab's poll loop to refresh the tray icon."""
         if hasattr(self, "_tray"):
             self._tray.update(cpu_temp, profile)
 
     def closeEvent(self, event) -> None:
-        """Hide to tray instead of quitting (KDE convention)."""
         if hasattr(self, "_tray") and self._tray.isVisible():
             self.hide()
             event.ignore()
         else:
             event.accept()
 
-    def _populate_tabs(self) -> None:
-        self._tabs.clear()
-        self._ctrl.sense_base = self._detector.get_sense_base()
-
-        # Use fromTheme() icons — Breeze provides all of these
-        for key in self._detector.get_available_tabs():
-            if key == "thermal_fan":
-                self._tabs.addTab(
-                    ThermalFanTab(self._ctrl),
-                    QIcon.fromTheme("cpu"),
-                    "Thermal & Fan",
-                )
-            elif key == "battery":
-                self._tabs.addTab(
-                    BatteryTab(self._ctrl),
-                    QIcon.fromTheme("battery"),
-                    "Battery",
-                )
-            elif key == "keyboard":
-                self._tabs.addTab(
-                    KeyboardTab(self._ctrl),
-                    QIcon.fromTheme("input-keyboard"),
-                    "Keyboard RGB",
-                )
-            elif key == "advanced":
-                self._tabs.addTab(
-                    AdvancedTab(self._ctrl),
-                    QIcon.fromTheme("configure"),
-                    "Advanced",
-                )
-
-        if self._tabs.count() == 0:
-            placeholder = QLabel(
-                "No linuwu-sense features detected.\n\n"
-                "Make sure the kernel module is loaded:\n"
-                "    sudo modprobe linuwu_sense"
-            )
-            placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-            placeholder.setProperty("secondary", "true")
-            self._tabs.addTab(placeholder,
-                              QIcon.fromTheme("dialog-warning"), "Status")
-
-
     def _show_welcome(self) -> None:
         WelcomeDialog(self).exec()
 
     def _refresh(self) -> None:
         self._detector.sense_base = self._detector._find_sense_base()
-        self._populate_tabs()
+        self._populate_pages()
 
     def _about(self) -> None:
         AboutDialog(self).exec()
-

@@ -73,6 +73,8 @@ class FeatureDetector:
         tabs: List[str] = []
         if f["thermal_profiles"] or f["fan_control"]:
             tabs.append("thermal_fan")
+        if f["fan_control"]:
+            tabs.append("fan_control")
         if f["battery_limiter"] or f["battery_calibration"]:
             tabs.append("battery")
         if f["keyboard_rgb"] or f["four_zoned_kb"]:

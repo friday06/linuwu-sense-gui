@@ -40,8 +40,9 @@ QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top left;
     padding: 0 4px;
-    color: palette(mid);
+    color: palette(windowtext);
     font-size: 11px;
+    font-weight: 500;
 }
 
 
@@ -73,8 +74,8 @@ QPushButton[accent="true"] {
     border: 1px solid palette(highlight);
     font-weight: 600;
 }
-QPushButton[accent="true"]:hover   { background-color: palette(light); }
-QPushButton[accent="true"]:pressed { background-color: palette(dark);  }
+QPushButton[accent="true"]:hover   { background-color: palette(highlight); filter: brightness(1.1); }
+QPushButton[accent="true"]:pressed { background-color: palette(highlight); filter: brightness(0.85); }
 QPushButton[accent="true"]:disabled {
     background-color: palette(mid);
     color: palette(shadow);
@@ -93,7 +94,7 @@ QPushButton[danger="true"]:pressed { background-color: #c0394a; border-color: #c
 
 /* ── Secondary / de-emphasised text ──────────────────────────────────── */
 QLabel[secondary="true"] {
-    color: palette(mid);
+    color: palette(placeholdertext);
     font-size: 11px;
 }
 
@@ -141,7 +142,18 @@ def main() -> None:
             app.setStyle(name)
             break
 
-    app.setStyleSheet(_ROLE_QSS)
+    app.setStyleSheet(_ROLE_QSS + """
+    QPushButton[edit-toggle="true"] {
+        border: 1px solid palette(mid);
+        border-radius: 4px;
+        padding: 3px 8px;
+    }
+    QPushButton[edit-toggle="true"]:checked {
+        background-color: palette(highlight);
+        color: palette(highlighted-text);
+        border-color: palette(highlight);
+    }
+""")
 
     window = MainWindow()
     window.show()

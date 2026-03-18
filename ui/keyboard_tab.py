@@ -9,7 +9,7 @@ from PyQt6.QtWidgets import (
     QGroupBox, QSpinBox, QGridLayout, QComboBox, QSlider,
     QScrollArea, QFrame, QApplication, QStyle, QSizePolicy,
 )
-from PyQt6.QtCore import Qt, pyqtSignal, QRectF
+from PyQt6.QtCore import Qt, pyqtSignal, QTimer, QRectF
 from PyQt6.QtGui import QColor, QPainter, QPen, QFont
 
 from controller.sysfs_controller import SysfsController
@@ -161,6 +161,11 @@ class KeyboardTab(QWidget):
     def __init__(self, controller: SysfsController) -> None:
         super().__init__()
         self._ctrl = controller
+        # Debounce timer — batches rapid colour changes into one sysfs write
+        self._apply_timer = QTimer(self)
+        self._apply_timer.setSingleShot(True)
+        self._apply_timer.setInterval(400)   # ms after last change
+        self._apply_timer.timeout.connect(self._flush_zone_colors)
         self._build_ui()
         self._load()
 
@@ -173,6 +178,7 @@ class KeyboardTab(QWidget):
         scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         inner  = QWidget()
+        inner.setMaximumWidth(1600)
         layout = QVBoxLayout(inner)
         layout.setSpacing(sp * 2)
         layout.setContentsMargins(m, m, m, m)
@@ -260,7 +266,13 @@ class KeyboardTab(QWidget):
         layout.addWidget(presets_grp)
 
         layout.addStretch()
-        scroll.setWidget(inner)
+        outer_w = QWidget()
+        outer_l = QHBoxLayout(outer_w)
+        outer_l.setContentsMargins(0, 0, 0, 0)
+        outer_l.addStretch()
+        outer_l.addWidget(inner, 1)
+        outer_l.addStretch()
+        scroll.setWidget(outer_w)
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
         outer.addWidget(scroll)
@@ -278,14 +290,19 @@ class KeyboardTab(QWidget):
         self._zone_btns[zone]._pick()
 
     def _on_zone_changed(self) -> None:
+        """Update preview immediately, debounce the sysfs write."""
         colors = {z: b.get_hex() for z, b in self._zone_btns.items()}
         self._preview.set_colors(colors)
+        self._apply_timer.start()   # restarts on every change; fires once idle
+
+    def _flush_zone_colors(self) -> None:
+        """Write current colours to hardware — called after debounce settles."""
+        colors = {z: b.get_hex() for z, b in self._zone_btns.items()}
         self._ctrl.set_per_zone_colors(colors, self._brightness.value())
 
     def _on_brightness(self, val: int) -> None:
         self._brightness_lbl.setText(f"{val}%")
-        self._ctrl.set_per_zone_colors(
-            {z: b.get_hex() for z, b in self._zone_btns.items()}, val)
+        self._apply_timer.start()   # debounced
 
     def _apply_effect(self) -> None:
         mode      = KB_EFFECTS[self._effect_combo.currentText()]
