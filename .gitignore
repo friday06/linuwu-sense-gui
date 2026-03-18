@@ -22,3 +22,5 @@ src/
 # OS
 .DS_Store
 Thumbs.db
+pkg/
+src/
