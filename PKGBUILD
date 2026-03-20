@@ -2,7 +2,7 @@
 # Kernel module by: 0x7375646F (sudo) <https://github.com/0x7375646F/Linuwu-Sense>
 
 pkgname=linuwu-sense-gui
-pkgver=1.0.0
+pkgver=1.1.2
 pkgrel=1
 pkgdesc="KDE/PyQt6 GUI for Acer Predator & Nitro laptops via the linuwu_sense kernel module"
 arch=('any')
