@@ -37,7 +37,7 @@ from PyQt6.QtGui import (QPainter, QColor, QPen, QLinearGradient,
 from PyQt6.QtCore import QMimeData
 from controller.sysfs_controller import SysfsController
 from ui.notifications import notify
-from ui.settings_tab import warn_threshold, critical_threshold, poll_interval_ms, celsius_to_unit, temp_unit
+from ui.settings_tab import warn_threshold, critical_threshold, poll_interval_ms, celsius_to_unit, temp_unit, background_polling
 
 # ── KDE power-profile maps ────────────────────────────────────────────────────
 
@@ -1354,4 +1354,6 @@ class ThermalFanTab(QWidget):
 
     def hideEvent(self, event) -> None:
         super().hideEvent(event)
-        self._poll_timer.stop()   # stop sensor reads when tab not visible
+        # Stop polling when hidden — always when tab changes, or when
+        # window is minimised to tray and background polling is disabled
+        self._poll_timer.stop()

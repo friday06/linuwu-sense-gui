@@ -74,8 +74,8 @@ QPushButton[accent="true"] {
     border: 1px solid palette(highlight);
     font-weight: 600;
 }
-QPushButton[accent="true"]:hover   { background-color: palette(highlight); filter: brightness(1.1); }
-QPushButton[accent="true"]:pressed { background-color: palette(highlight); filter: brightness(0.85); }
+QPushButton[accent="true"]:hover   { background-color: palette(highlight); border-color: palette(highlight); }
+QPushButton[accent="true"]:pressed { background-color: palette(mid); border-color: palette(highlight); }
 QPushButton[accent="true"]:disabled {
     background-color: palette(mid);
     color: palette(shadow);

@@ -87,6 +87,11 @@ class FanTab(QWidget):
 
         self._g_cpu_f = _Gauge("CPU Fan", "%", 100.0)
         self._g_gpu_f = _Gauge("GPU Fan", "%", 100.0)
+        # Detect hwmon RPM availability once at startup
+        _cpu_rpm, _gpu_rpm = self._ctrl.get_fan_rpm()
+        if _cpu_rpm is not None:
+            self._g_cpu_f.set_unit("RPM", 6000.0)
+            self._g_gpu_f.set_unit("RPM", 6000.0)
         self._g_cpu_f.setHwfDisabled(True)
         self._g_gpu_f.setHwfDisabled(True)
         gg_layout.addWidget(self._g_cpu_f, 0, 0)
@@ -208,18 +213,44 @@ class FanTab(QWidget):
     # ── Live poll ─────────────────────────────────────────────────────────────
 
     def _poll(self) -> None:
-        cpu_f, gpu_f = self._ctrl.get_fan_speed()
-        cpu_f = cpu_f or 0
-        gpu_f = gpu_f or 0
+        # Try hwmon RPM first (real tachometer)
+        cpu_rpm, gpu_rpm = self._ctrl.get_fan_rpm()
+        # Fallback: set-point percentage from sysfs
+        cpu_set, gpu_set = self._ctrl.get_fan_speed()
+        cpu_set = cpu_set or 0
+        gpu_set = gpu_set or 0
+
         if self._fan_toggle.is_auto:
             self._g_cpu_f.set_text("Auto")
             self._g_gpu_f.set_text("Auto")
         else:
             self._g_cpu_f.set_text(None)
             self._g_gpu_f.set_text(None)
-            self._g_cpu_f.set_value(float(cpu_f))
-            self._g_gpu_f.set_value(float(gpu_f))
-        self._fan_graph.push([float(cpu_f), float(gpu_f)])
+            if cpu_rpm is not None:
+                self._g_cpu_f.set_unit("RPM", 6000.0)
+                self._g_cpu_f.set_value(float(cpu_rpm))
+            else:
+                self._g_cpu_f.set_unit("%", 100.0)
+                self._g_cpu_f.set_value(float(cpu_set))
+            if gpu_rpm is not None:
+                self._g_gpu_f.set_unit("RPM", 6000.0)
+                self._g_gpu_f.set_value(float(gpu_rpm))
+            else:
+                self._g_gpu_f.set_unit("%", 100.0)
+                self._g_gpu_f.set_value(float(gpu_set))
+
+        # Graph: show RPM if available, else % set-point
+        if cpu_rpm is not None:
+            self._fan_graph.set_unit("RPM", 6000.0)
+            self._fan_graph.push([float(cpu_rpm or 0), float(gpu_rpm or 0)])
+        else:
+            self._fan_graph.set_unit("%", 100.0)
+            self._fan_graph.push([float(cpu_set), float(gpu_set)])
+
+        # Update graph legend labels
+        unit = "RPM" if cpu_rpm is not None else "%"
+        self._fan_graph._traces[0] = (f"CPU Fan {unit}", self._fan_graph._traces[0][1])
+        self._fan_graph._traces[1] = (f"GPU Fan {unit}", self._fan_graph._traces[1][1])
 
     def showEvent(self, event) -> None:
         super().showEvent(event)

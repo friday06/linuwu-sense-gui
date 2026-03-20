@@ -55,58 +55,21 @@ command -v python3 &>/dev/null || error "python3 not found — install it via yo
 info "python3 found — $(python3 --version)"
 
 # PyQt6
-_install_pyqt6() {
-    echo ""
-    echo -e "  ${YELLOW}PyQt6 is not installed.${NC}"
-    echo -e "  Please choose how to install it:\n"
-    echo -e "  ${BOLD}  1)${NC}  Arch / Manjaro          ${CYAN}pacman -S python-pyqt6${NC}"
-    echo -e "  ${BOLD}  2)${NC}  Ubuntu / Debian / Mint  ${CYAN}apt install python3-pyqt6${NC}"
-    echo -e "  ${BOLD}  3)${NC}  Fedora / RHEL           ${CYAN}dnf install python3-pyqt6${NC}"
-    echo -e "  ${BOLD}  4)${NC}  openSUSE                ${CYAN}zypper install python3-qt6${NC}"
-    echo -e "  ${BOLD}  5)${NC}  pip  (any distro)       ${CYAN}pip install PyQt6${NC}"
-    echo -e "  ${BOLD}  6)${NC}  Skip — I'll install it myself"
-    echo ""
-    read -rp "  Enter choice [1-6]: " choice
-
-    case "$choice" in
-        1)
-            command -v pacman &>/dev/null || error "pacman not found on this system"
-            pacman -S --needed --noconfirm python-pyqt6 || error "pacman install failed"
-            ;;
-        2)
-            command -v apt-get &>/dev/null || error "apt-get not found on this system"
-            apt-get install -y python3-pyqt6 || error "apt install failed"
-            ;;
-        3)
-            command -v dnf &>/dev/null || error "dnf not found on this system"
-            dnf install -y python3-pyqt6 || error "dnf install failed"
-            ;;
-        4)
-            command -v zypper &>/dev/null || error "zypper not found on this system"
-            zypper install -y python3-qt6 || error "zypper install failed"
-            ;;
-        5)
-            command -v pip3 &>/dev/null || error "pip3 not found — install python3-pip first"
-            pip3 install PyQt6 --break-system-packages || pip3 install PyQt6 || error "pip install failed"
-            ;;
-        6)
-            warn "Skipping PyQt6 install — the app will not launch until PyQt6 is available"
-            return
-            ;;
-        *)
-            error "Invalid choice '$choice' — aborting"
-            ;;
-    esac
-
-    python3 -c "import PyQt6" 2>/dev/null || error "PyQt6 still not importable after install — check the output above"
-    info "PyQt6 installed successfully"
-}
-
 if python3 -c "import PyQt6" 2>/dev/null; then
     VER=$(python3 -c "import PyQt6.QtCore; print(PyQt6.QtCore.PYQT_VERSION_STR)" 2>/dev/null || echo "unknown")
     info "PyQt6 found — v$VER"
 else
-    _install_pyqt6
+    warn "PyQt6 not found — attempting install..."
+    if command -v pacman &>/dev/null; then
+        pacman -S --needed --noconfirm python-pyqt6 || error "Failed to install python-pyqt6"
+    elif command -v apt-get &>/dev/null; then
+        apt-get install -y python3-pyqt6 || error "Failed to install python3-pyqt6"
+    elif command -v dnf &>/dev/null; then
+        dnf install -y python3-pyqt6 || error "Failed to install python3-pyqt6"
+    else
+        error "Cannot install PyQt6 automatically. Run: pip install PyQt6"
+    fi
+    info "PyQt6 installed"
 fi
 
 # power-profiles-daemon (optional)

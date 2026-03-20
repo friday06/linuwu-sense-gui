@@ -39,6 +39,16 @@ def celsius_to_unit(c: float) -> float:
     return c if temp_unit() == "°C" else c * 9 / 5 + 32
 
 
+def background_polling() -> bool:
+    """Return True if background sensor polling is enabled (default: True)."""
+    return get_settings().value("settings/background_polling", True, type=bool)
+
+
+def tray_icon_enabled() -> bool:
+    """Return True if the system tray icon is enabled (default: True)."""
+    return get_settings().value("settings/tray_icon", True, type=bool)
+
+
 class SettingsTab(QWidget):
     def __init__(self) -> None:
         super().__init__()
@@ -135,6 +145,29 @@ class SettingsTab(QWidget):
         nl.addWidget(notif_hint)
         layout.addWidget(notif_grp)
 
+        # ── Background behaviour ──────────────────────────────────────────
+        bg_grp = QGroupBox("Background Behaviour")
+        bl = QVBoxLayout(bg_grp)
+        bl.setSpacing(sp)
+
+        from PyQt6.QtWidgets import QCheckBox
+        self._bg_poll_cb = QCheckBox(
+            "Continue monitoring sensors when window is closed to tray")
+        bl.addWidget(self._bg_poll_cb)
+
+        self._tray_cb = QCheckBox("Show system tray icon")
+        bl.addWidget(self._tray_cb)
+
+        bg_hint = QLabel(
+            "When polling is disabled, sensors pause while hidden — no CPU used.\n"
+            "Disabling the tray icon causes the app to fully quit on window close.\n"
+            "Changes take effect after restarting the app."
+        )
+        bg_hint.setWordWrap(True)
+        bg_hint.setProperty("secondary", "true")
+        bl.addWidget(bg_hint)
+        layout.addWidget(bg_grp)
+
         # ── Apply ─────────────────────────────────────────────────────────
         apply_btn = QPushButton("Apply Settings")
         apply_btn.setProperty("accent", "true")
@@ -172,6 +205,10 @@ class SettingsTab(QWidget):
         # Thresholds
         self._warn_spin.setValue(s.value("settings/warn_threshold", 75, type=int))
         self._crit_spin.setValue(s.value("settings/critical_threshold", 90, type=int))
+        self._bg_poll_cb.setChecked(
+            s.value("settings/background_polling", True, type=bool))
+        self._tray_cb.setChecked(
+            s.value("settings/tray_icon", True, type=bool))
 
     def _apply(self) -> None:
         if self._warn_spin.value() >= self._crit_spin.value():
@@ -185,6 +222,8 @@ class SettingsTab(QWidget):
                    "°C" if self._unit_combo.currentIndex() == 0 else "°F")
         s.setValue("settings/warn_threshold", self._warn_spin.value())
         s.setValue("settings/critical_threshold", self._crit_spin.value())
+        s.setValue("settings/background_polling", self._bg_poll_cb.isChecked())
+        s.setValue("settings/tray_icon", self._tray_cb.isChecked())
         QMessageBox.information(self, "Settings",
             "Settings saved. Restart the app for poll interval changes to take effect.")
 
@@ -194,4 +233,6 @@ class SettingsTab(QWidget):
         s.remove("settings/temp_unit")
         s.remove("settings/warn_threshold")
         s.remove("settings/critical_threshold")
+        s.remove("settings/background_polling")
+        s.remove("settings/tray_icon")
         self._load()

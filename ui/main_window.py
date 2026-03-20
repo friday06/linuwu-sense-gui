@@ -30,6 +30,7 @@ from controller.sysfs_controller import SysfsController
 from config.constants import APP_NAME, APP_VERSION, ICON_PATH
 from ui.tray_icon import TrayIcon
 from ui.welcome import WelcomeDialog, should_show
+from ui.settings_tab import background_polling, tray_icon_enabled
 
 
 def _sp(metric: QStyle.PixelMetric) -> int:
@@ -342,6 +343,10 @@ class MainWindow(QMainWindow):
 
     def _setup_tray(self) -> None:
         if not QSystemTrayIcon.isSystemTrayAvailable():
+            return
+        if not tray_icon_enabled():
+            # No tray — app quits fully on close
+            self.setAttribute(Qt.WidgetAttribute.WA_DeleteOnClose, True)
             return
         self._tray = TrayIcon(self, self._ctrl)
         self._tray.show()

@@ -122,7 +122,38 @@ class SysfsController:
                 pass
         return None, None
 
+    # ── Hwmon fan RPM (actual hardware tachometer) ───────────────────────────
+
+    def get_fan_rpm(self) -> tuple[int | None, int | None]:
+        """
+        Read actual fan RPM from hwmon fan*_input nodes.
+        Returns (cpu_rpm, gpu_rpm) — None if node not found.
+        Searches for the EC/platform hwmon device which exposes fan tachometers.
+        """
+        import glob, os
+        fans: list[int] = []
+        # Try acpi_* / asus_ec / acer_wmi / nct* — common EC hwmon names
+        ec_names = ["acpi", "nct", "it8", "acer", "ite", "ec"]
+        for base in sorted(glob.glob("/sys/class/hwmon/hwmon*")):
+            try:
+                name = open(os.path.join(os.path.realpath(base), "name")).read().strip().lower()
+            except Exception:
+                continue
+            if not any(k in name for k in ec_names):
+                continue
+            for inp in sorted(glob.glob(os.path.join(os.path.realpath(base), "fan*_input"))):
+                try:
+                    fans.append(int(open(inp).read().strip()))
+                except Exception:
+                    pass
+        if len(fans) >= 2:
+            return fans[0], fans[1]
+        if len(fans) == 1:
+            return fans[0], None
+        return None, None
+
     # ── Battery limiter ───────────────────────────────────────────────────────
+
 
     def get_battery_limiter(self) -> Optional[bool]:
         raw = self._read(self._path(BATTERY_LIMITER_REL), "battery limiter")
