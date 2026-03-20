@@ -19,9 +19,13 @@ Runs without root at runtime. Integrates fully with KDE Plasma 6.
 
 ## Screenshots
 
-| Thermal & Fan | Battery | Advanced |
+| Overview | Fan Control | Battery |
 |:---:|:---:|:---:|
-| ![Thermal & Fan](assets/screenshot-thermal.png) | ![Battery](assets/screenshot-battery.png) | ![Advanced](assets/screenshot-advanced.png) |
+| ![Overview](assets/screenshot-overview.png) | ![Fan Control](assets/screenshot-fan_control.png) | ![Battery](assets/screenshot-battery.png) |
+
+| Advanced | Settings |
+|:---:|:---:|
+| ![Advanced](assets/screenshot-advanced.png) | ![Settings](assets/screenshot-settings.png) |
 
 ---
 
