@@ -4,6 +4,7 @@
 Linuwu Sense GUI provides elegant, system-integrated hardware controls for Acer Predator and Nitro series laptops. Written in Python with GTK4 and Libadwaita, it seamlessly blends into the modern Linux desktop, syncing directly with your system's `power-profiles-daemon`.
 
 ![Overview Page](assets/overview.png)
+![Battery Settings](assets/battery.png)
 
 ## Features
 
@@ -14,7 +15,7 @@ Linuwu Sense GUI provides elegant, system-integrated hardware controls for Acer 
 - **Battery Protection:** Toggle 80% charge limits to preserve long-term battery health, and perform deep recalibrations.
 - **Advanced Keyboard RGB:** Customize the 4-zone RGB keyboard with static colors, breathing, wave, and pulse effects.
 
-![Battery Settings](assets/battery.png)
+
 
 ## Installation
 
