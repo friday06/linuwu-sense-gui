@@ -1,0 +1,4 @@
+# Runtime dependency for linuwu-sense-gui
+# Arch Linux: sudo pacman -S python-pyqt6
+# Current Arch package: python-pyqt6 6.10.2-3
+PyQt6>=6.7.0

@@ -1,0 +1,70 @@
+<svg viewBox="0 0 512 526" xmlns="http://www.w3.org/2000/svg" width="100%" style="max-width:320px;display:block;margin:auto">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#0f0c2e"/>
+    </linearGradient>
+    <linearGradient id="accentH" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="nGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#c4b5fd"/>
+    </linearGradient>
+    <clipPath id="cl">
+      <rect x="0" y="0" width="512" height="512" rx="110"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect x="0" y="0" width="512" height="512" rx="110" fill="url(#bg)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Concentric rings centred on N -->
+  <g clip-path="url(#cl)" style="fill:rgb(0, 0, 0);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto">
+    <circle cx="256" cy="256" r="260" fill="none" stroke="#7c3aed" stroke-width="50" stroke-opacity="0.07" style="fill:none;stroke:rgb(124, 58, 237);color:rgb(0, 0, 0);stroke-width:50px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <circle cx="256" cy="256" r="178" fill="none" stroke="#38bdf8" stroke-width="28" stroke-opacity="0.07" style="fill:none;stroke:rgb(56, 189, 248);color:rgb(0, 0, 0);stroke-width:28px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <circle cx="256" cy="256" r="106" fill="none" stroke="#7c3aed" stroke-width="14" stroke-opacity="0.08" style="fill:none;stroke:rgb(124, 58, 237);color:rgb(0, 0, 0);stroke-width:14px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+    <rect x="0" y="250" width="512" height="1.5" fill="url(#accentH)" fill-opacity="0.13" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  </g>
+
+  <!-- ── N centred: x 156→356, y 136→376 ── -->
+  <rect x="156" y="136" width="32" height="240" rx="5" fill="url(#nGrad)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <rect x="324" y="136" width="32" height="240" rx="5" fill="url(#nGrad)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <polygon points="188,136 224,136 356,344 356,376 324,376 188,168" fill="url(#nGrad)" style="stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Arc over N -->
+  <path d="M 156 136 Q 256 88 356 136" fill="none" stroke="url(#accentH)" stroke-width="3.5" stroke-opacity="0.85" stroke-linecap="round" style="fill:none;color:rgb(0, 0, 0);stroke-width:3.5px;stroke-linecap:round;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Red dot -->
+  <circle cx="343" cy="148" r="15" fill="#ff3a3a" fill-opacity="0.92" style="fill:rgb(255, 58, 58);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <circle cx="343" cy="148" r="7" fill="#ff9090" style="fill:rgb(255, 144, 144);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- ── LINUWU stacked in left margin (x≈30, letters fit 20px each) ── -->
+  <!-- 6 letters × 36px spacing, centred vertically: start y = 256 - (5*36)/2 = 166 -->
+  <text x="62" y="166" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,'Noto Sans',sans-serif" font-size="28" font-weight="700" fill="#ffffff" fill-opacity="0.92" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:-apple-system, &quot;Noto Sans&quot;, sans-serif;font-size:28px;font-weight:700;text-anchor:middle;dominant-baseline:central">L</text>
+  <text x="62" y="202" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,'Noto Sans',sans-serif" font-size="28" font-weight="700" fill="#ffffff" fill-opacity="0.92" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:-apple-system, &quot;Noto Sans&quot;, sans-serif;font-size:28px;font-weight:700;text-anchor:middle;dominant-baseline:central">I</text>
+  <text x="62" y="238" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,'Noto Sans',sans-serif" font-size="28" font-weight="700" fill="#ffffff" fill-opacity="0.92" style="fill:rgb(255, 255, 255);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:-apple-system, &quot;Noto Sans&quot;, sans-serif;font-size:28px;font-weight:700;text-anchor:middle;dominant-baseline:central">N</text>
+  <text x="62" y="274" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,'Noto Sans',sans-serif" font-size="28" font-weight="700" fill="#a78bfa" fill-opacity="0.88" style="fill:rgb(167, 139, 250);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:-apple-system, &quot;Noto Sans&quot;, sans-serif;font-size:28px;font-weight:700;text-anchor:middle;dominant-baseline:central">U</text>
+  <text x="62" y="310" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,'Noto Sans',sans-serif" font-size="28" font-weight="700" fill="#a78bfa" fill-opacity="0.88" style="fill:rgb(167, 139, 250);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:-apple-system, &quot;Noto Sans&quot;, sans-serif;font-size:28px;font-weight:700;text-anchor:middle;dominant-baseline:central">W</text>
+  <text x="62" y="346" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,'Noto Sans',sans-serif" font-size="28" font-weight="700" fill="#a78bfa" fill-opacity="0.88" style="fill:rgb(167, 139, 250);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:-apple-system, &quot;Noto Sans&quot;, sans-serif;font-size:28px;font-weight:700;text-anchor:middle;dominant-baseline:central">U</text>
+
+  <!-- Thin left-column divider -->
+  <rect x="98" y="120" width="1" height="272" fill="#a78bfa" fill-opacity="0.2" style="fill:rgb(167, 139, 250);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- ── Sense in right margin, centred vertically ── -->
+  <!-- 5 letters × 36px, start y = 256 - (4*36)/2 = 184 -->
+  <text x="450" y="184" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,'Noto Sans',sans-serif" font-size="28" font-weight="700" fill="#ff3a3a" fill-opacity="0.95" style="fill:rgb(255, 58, 58);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:-apple-system, &quot;Noto Sans&quot;, sans-serif;font-size:28px;font-weight:700;text-anchor:middle;dominant-baseline:central">S</text>
+  <text x="450" y="220" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,'Noto Sans',sans-serif" font-size="28" font-weight="700" fill="#ff3a3a" fill-opacity="0.95" style="fill:rgb(255, 58, 58);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:-apple-system, &quot;Noto Sans&quot;, sans-serif;font-size:28px;font-weight:700;text-anchor:middle;dominant-baseline:central">e</text>
+  <text x="450" y="256" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,'Noto Sans',sans-serif" font-size="28" font-weight="700" fill="#ff3a3a" fill-opacity="0.95" style="fill:rgb(255, 58, 58);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:-apple-system, &quot;Noto Sans&quot;, sans-serif;font-size:28px;font-weight:700;text-anchor:middle;dominant-baseline:central">n</text>
+  <text x="450" y="292" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,'Noto Sans',sans-serif" font-size="28" font-weight="700" fill="#ff3a3a" fill-opacity="0.95" style="fill:rgb(255, 58, 58);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:-apple-system, &quot;Noto Sans&quot;, sans-serif;font-size:28px;font-weight:700;text-anchor:middle;dominant-baseline:central">s</text>
+  <text x="450" y="328" text-anchor="middle" dominant-baseline="central" font-family="-apple-system,'Noto Sans',sans-serif" font-size="28" font-weight="700" fill="#ff3a3a" fill-opacity="0.95" style="fill:rgb(255, 58, 58);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:-apple-system, &quot;Noto Sans&quot;, sans-serif;font-size:28px;font-weight:700;text-anchor:middle;dominant-baseline:central">e</text>
+
+  <!-- Thin right-column divider -->
+  <rect x="413" y="120" width="1" height="272" fill="#ff3a3a" fill-opacity="0.2" style="fill:rgb(255, 58, 58);stroke:none;color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+  <!-- Borders -->
+  <rect x="0" y="0" width="512" height="512" rx="110" fill="none" stroke="#7c3aed" stroke-width="2.5" stroke-opacity="0.5" style="fill:none;stroke:rgb(124, 58, 237);color:rgb(0, 0, 0);stroke-width:2.5px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+  <rect x="4" y="4" width="504" height="504" rx="107" fill="none" stroke="#38bdf8" stroke-width="1" stroke-opacity="0.14" style="fill:none;stroke:rgb(56, 189, 248);color:rgb(0, 0, 0);stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;opacity:1;font-family:&quot;Anthropic Sans&quot;, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;font-size:16px;font-weight:400;text-anchor:start;dominant-baseline:auto"/>
+
+</svg>
