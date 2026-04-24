@@ -23,7 +23,7 @@ Linuwu Sense GUI provides elegant, system-integrated hardware controls for Acer 
 If you are using Arch Linux, you can install the GUI (and its required kernel module dependencies) directly from the AUR:
 
 ```bash
-paru -S linuwu-sense-gui linuwu-sense-dkms
+paru -S linuwu-sense-dkms
 ```
 
 ### Manual Installation
