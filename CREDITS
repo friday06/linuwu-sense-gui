@@ -9,22 +9,27 @@ linuwu_sense kernel module
   https://github.com/0x7375646F/Linuwu-Sense
 
 linuwu-sense-gui application
-─────────────────────────────
+────────────────────────────
 friday06
   Created and maintains this GUI application.
 
-Claude (Anthropic AI assistant)
-  Assisted with GUI development, code structure, and refactoring.
-  https://claude.ai
+Antigravity — Google
+ Assisted with GUI development, code structure, and refactoring.
+  https://www.google.com/search?q=antigravity
 
 Frameworks
 ──────────
-Qt / PyQt6 — Riverbank Computing
-  https://www.riverbankcomputing.com/software/pyqt/
+GTK — GNOME Project
+  Core toolkit used to build the graphical interface.
+  https://www.gtk.org/
 
-KDE Breeze — KDE community
-  Visual design reference and style engine.
-  https://kde.org
+libadwaita — GNOME Project
+  Provides modern GNOME design components and adaptive widgets.
+  https://gnome.pages.gitlab.gnome.org/libadwaita/
+
+GLib — GNOME Project
+  Core application building blocks and utilities.
+  https://developer.gnome.org/glib/
 
 License
 ───────
